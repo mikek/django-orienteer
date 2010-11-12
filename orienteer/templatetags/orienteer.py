@@ -36,17 +36,21 @@ def compass(filename, media):
     proj_dir = settings.COMPASS_PROJECT_DIR
     output_dir = settings.COMPASS_OUTPUT_DIR
     output_url = settings.COMPASS_OUTPUT_URL
+    use_timestamp = getattr(settings, 'COMPASS_USE_TIMESTAMP', True)
     
     needs_update = False
-
-    # get timestamp of css, if it doesn't exist we need to make it
-    try:
-        stat = os.stat(proj_dir + filename + '.css')
-        output_file_ts = stat.st_mtime
-    except:
-        output_file_ts = '1'
     
-    css = "<link rel='stylesheet' href='%s?%s' type='text/css' media='%s' />" % (output_url + filename + '.css', output_file_ts, media)
+    # get timestamp of css, if it doesn't exist we need to make it
+    if use_timestamp:
+        try:
+            stat = os.stat(proj_dir + filename + '.css')
+            output_file_ts = stat.st_mtime
+        except:
+            output_file_ts = '1'
+    else:
+        output_file_ts = None
+    
+    css = "<link rel='stylesheet' href='%s%s' type='text/css' media='%s' />" % (output_url + filename + '.css', use_timestamp and '?%s' % output_file_ts or '', media)
     
     # if we aren't debugging (in production for example), short-cicuit this madness
     if not settings.TEMPLATE_DEBUG:
