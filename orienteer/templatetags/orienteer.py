@@ -36,6 +36,7 @@ def compass(filename, media):
     proj_dir = settings.COMPASS_PROJECT_DIR
     output_dir = settings.COMPASS_OUTPUT_DIR
     output_url = settings.COMPASS_OUTPUT_URL
+    quiet_mode = getattr(settings, 'COMPASS_QUIET', False)
     use_timestamp = getattr(settings, 'COMPASS_USE_TIMESTAMP', True)
     
     needs_update = False
@@ -61,9 +62,10 @@ def compass(filename, media):
         'sass_style': settings.COMPASS_STYLE, 
         'project_dir': proj_dir,  
         'output_dir': output_dir, 
+        'quiet_flag': quiet_mode and "--quiet" or ""
     }
     
-    cmd = "%(bin)s compile -s %(sass_style)s --css-dir %(output_dir)s %(project_dir)s" % cmd_dict
+    cmd = "%(bin)s compile %(quiet_flag)s -s %(sass_style)s --css-dir %(output_dir)s %(project_dir)s" % cmd_dict
     (status, output) = getstatusoutput(cmd)
     print output
     
