@@ -74,6 +74,8 @@ def compass(filename, media):
     
     cmd = "%(bin)s compile %(quiet_flag)s -s %(sass_style)s --css-dir %(output_dir)s %(project_dir)s" % cmd_dict
     (status, output) = getstatusoutput(cmd)
-    print output
+    if output:
+        for line in re.split("\n+", output):
+            sys.stderr.write(re.sub(r'^', '[Compass] ', line) + "\n")
     
     return css
