@@ -22,6 +22,8 @@ import os
 import re
 import sys
 import subprocess
+from datetime import datetime
+from time import mktime
 
 from django import template
 from django.conf import settings
@@ -48,17 +50,30 @@ def compass(filename, media):
     source_dir = getattr(settings, 'COMPASS_SOURCE_DIR', 'src')
     extra_opts = re.split("\s", getattr(settings, 'COMPASS_EXTRA_OPTS', ''))
     use_timestamp = getattr(settings, 'COMPASS_USE_TIMESTAMP', True)
-    debug = getattr(settings, 'COMPASS_DEBUG', settings.TEMPLATE_DEBUG)
+    debug = getattr(settings, 'COMPASS_DEBUG', settings.DEBUG)
 
     # get timestamp of css, if it doesn't exist we need to make it
     try:
         output_file_stat = os.stat(os.path.join(project_dir, output_dir, filename + '.css'))
         output_file_ts = output_file_stat.st_mtime
     except OSError:
-        output_file_ts = 1
+        output_file_ts = 0
+
+    ts = ''
+    if use_timestamp:
+        # generate timestamp on the fly if there is no target file yet
+        if output_file_ts:
+            ts = '?%s' % output_file_ts
+        else:
+            ts = '?%s' % mktime(datetime.now().timetuple())
+    css = "<link rel='stylesheet' href='%s%s' type='text/css' media='%s'/>" %\
+          (output_url + filename + '.css', ts, media)
+
+    # do not try to find source file if we are not debugging templates
+    if not settings.TEMPLATE_DEBUG:
+        return css
 
     source_file_ts = 0
-
     for root, dirs, files in os.walk(os.path.join(project_dir, source_dir)):
         for source_file in files:
             if source_file[-5:].lower() == '.scss':
@@ -66,14 +81,7 @@ def compass(filename, media):
                 if source_file_stat.st_mtime > source_file_ts:
                     source_file_ts = source_file_stat.st_mtime
 
-    needs_update = source_file_ts > output_file_ts
-
-    css = "<link rel='stylesheet' href='%s%s' type='text/css' media='%s'/>" % \
-          (output_url + filename + '.css',
-           use_timestamp and '?%s' % output_file_ts or '',
-           media)
-
-    if not settings.TEMPLATE_DEBUG or not needs_update:
+    if source_file_ts < output_file_ts:
         return css
 
     cmd = [binary, 'compile', '--css-dir', output_dir,
