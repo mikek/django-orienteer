@@ -90,7 +90,7 @@ def compass(filename, media):
     if extra_opts:
         cmd.extend(extra_opts)
     if debug:
-        sys.stderr.write(' '.join(cmd))
+        sys.stderr.write(' '.join(cmd) + "\n")
     (status, output) = run(cmd)
     if output:
         for line in re.split("\n+", output.strip()):
