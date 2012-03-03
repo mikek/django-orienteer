@@ -13,27 +13,35 @@ you. Be sure to *carefully read the instructions* below for settings specifics.
 
 ###Required settings
 
-In your Django settings.py file, define the path to compass project root.
+In your Django settings.py file, define **absolute path** to compass project
+root.
 
-    COMPASS_PROJECT_DIR = STATIC_ROOT + 'css/'
+    COMPASS_PROJECT_DIR = YOUR_PROJECT_ROOT + 'css/'
 
-Then, define the css output directory. **This is relative to the project
-directory.**
+Also, set the URL where your output files will be accessed. Can be ommited if
+`STATIC_URL` is set.
 
-    COMPASS_OUTPUT_DIR = './'
-
-Also, set the URL where your output files will be accessed.
-
-    COMPASS_OUTPUT_URL = STATIC_URL + 'css/'
-
-Finally, define where the compass binary is (it can be relative if binary is
-in the *PATH* environment variable).
-
-    COMPASS_BIN = '/usr/bin/compass'
+    COMPASS_OUTPUT_URL = "%scss" % STATIC_URL
 
 ###Optional settings
 
-Set path to the compass/scss files. Default is 'src'.
+Define the css output directory. **This is relative to the compass project
+directory** and defaults to it.
+
+    COMPASS_OUTPUT_DIR = './'
+
+Path to the compass script and ruby binary (can be just a name if *PATH*
+environment variable is set appropriately). Default script name is 'compass'.
+Default ruby binary is an empty string, and the script will be executed
+directly.
+
+    COMPASS_SCRIPT = '/usr/bin/compass'
+    COMPASS_RUBY_BIN '/usr/bin/ruby'
+
+(On Windows, however, you should specify full paths in the following
+format: "C:\\Ruby193\\bin\\ruby.exe")
+
+Set compass project relative path to the compass/scss files. Default is 'src'.
 
     COMPASS_SOURCE_DIR = 'sass'
 

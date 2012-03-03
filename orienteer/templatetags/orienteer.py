@@ -29,9 +29,9 @@ from django import template
 from django.conf import settings
 
 
-def run(cmd):
+def run(cmd, cwd=None):
     """Return (status, output) of executing cmd."""
-    pipe = subprocess.Popen(cmd, shell=False, universal_newlines=True,
+    pipe = subprocess.Popen(cmd, shell=False, executable=cmd[0], cwd=cwd, universal_newlines=True,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     output = str.join('', pipe.stdout.readlines())
     sts = pipe.wait()
@@ -43,14 +43,23 @@ register = template.Library()
 
 @register.simple_tag
 def compass(filename, media):
-    binary = settings.COMPASS_BIN
-    output_dir = settings.COMPASS_OUTPUT_DIR
-    output_url = settings.COMPASS_OUTPUT_URL
     project_dir = settings.COMPASS_PROJECT_DIR
+    ruby_binary = getattr(settings, 'COMPASS_RUBY_BIN', '')
+    compass_script = getattr(settings, 'COMPASS_SCRIPT', 'compass')
+    output_dir = getattr(settings, 'COMPASS_OUTPUT_DIR', './')
     source_dir = getattr(settings, 'COMPASS_SOURCE_DIR', 'src')
-    extra_opts = re.split("\s", getattr(settings, 'COMPASS_EXTRA_OPTS', ''))
     use_timestamp = getattr(settings, 'COMPASS_USE_TIMESTAMP', True)
     debug = getattr(settings, 'COMPASS_DEBUG', settings.DEBUG)
+
+    output_url = getattr(settings, 'COMPASS_OUTPUT_URL', None)
+    if not output_url and settings.STATIC_URL:
+        output_url = '%scss/' % settings.STATIC_URL
+
+    extra_opts_str = getattr(settings, 'COMPASS_EXTRA_OPTS', '')
+    extra_opts = []
+    # avoid passing empty options in cmd array
+    if extra_opts_str:
+        extra_opts = re.split("\s", extra_opts_str)
 
     # get timestamp of css, if it doesn't exist we need to make it
     try:
@@ -84,11 +93,12 @@ def compass(filename, media):
     if source_file_ts < output_file_ts:
         return css
 
-    cmd = [binary, 'compile', '--css-dir', output_dir,
+    cmd = [compass_script, 'compile', '--css-dir', output_dir,
            '--sass-dir', source_dir, project_dir]
-    # avoid passing empty options in cmd array
-    if extra_opts:
-        cmd.extend(extra_opts)
+    if ruby_binary:
+        cmd.insert(0, ruby_binary)
+    cmd.extend(extra_opts)
+
     if debug:
         sys.stderr.write(' '.join(cmd) + "\n")
     (status, output) = run(cmd)
