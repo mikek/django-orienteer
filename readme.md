@@ -53,6 +53,12 @@ Turn off timestamps in generated css path if you want for some reason.
 
     COMPASS_USE_TIMESTAMP = False
 
+Bypass compass if newest source and target file timestamps are equal. (This
+might happen in some rare cases, maybe caused by some stupid VCS or compass
+frontends.)
+
+    COMPASS_SKIP_ON_EQUAL_TIMESTAMP = True
+
 Show exact compass command used on *sdterr*. It is equal to `DEBUG`
 by default.
 

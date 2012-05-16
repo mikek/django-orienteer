@@ -49,6 +49,7 @@ def compass(filename, media):
     output_dir = getattr(settings, 'COMPASS_OUTPUT_DIR', './')
     source_dir = getattr(settings, 'COMPASS_SOURCE_DIR', 'src')
     use_timestamp = getattr(settings, 'COMPASS_USE_TIMESTAMP', True)
+    skip_on_equal_timestamp = getattr(settings, 'COMPASS_SKIP_ON_EQUAL_TIMESTAMP', False)
     debug = getattr(settings, 'COMPASS_DEBUG', settings.DEBUG)
 
     output_url = getattr(settings, 'COMPASS_OUTPUT_URL', None)
@@ -90,7 +91,8 @@ def compass(filename, media):
                 if source_file_stat.st_mtime > source_file_ts:
                     source_file_ts = source_file_stat.st_mtime
 
-    if source_file_ts < output_file_ts:
+    if ((source_file_ts < output_file_ts) or 
+            (skip_on_equal_timestamp and source_file_ts == output_file_ts)):
         return css
 
     cmd = [compass_script, 'compile', '--css-dir', output_dir,
