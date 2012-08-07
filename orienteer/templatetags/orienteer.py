@@ -15,7 +15,7 @@
 '''Simple Compass integration for Django'''
 
 __author__ = 'Drew Yeaton <drew@sentineldesign.net>'
-__version__ = '0.2'
+__version__ = '0.3'
 
 
 import os
