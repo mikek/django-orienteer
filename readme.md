@@ -16,12 +16,19 @@ you. Be sure to *carefully read the instructions* below for settings specifics.
 In your Django settings.py file, define **absolute path** to compass project
 root.
 
-    COMPASS_PROJECT_DIR = YOUR_PROJECT_ROOT + 'css/'
+    COMPASS_PROJECT_DIR = '%s/static/css/' % YOUR_PROJECT_ROOT
 
-Also, set the URL where your output files will be accessed. Can be ommited if
-`STATIC_URL` is set.
+If you are using `contrib.staticfiles`, set the path and URL where your output
+files will be accessed:
 
-    COMPASS_OUTPUT_URL = "%scss" % STATIC_URL
+    STATICFILES_DIRS = (
+        '%s/static' % YOUR_PROJECT_ROOT,
+    )
+    STATIC_URL = '/media/static/'
+
+*or* just set the COMPASS_OUTPUT_URL:
+
+    COMPASS_OUTPUT_URL = "/media/static/css"
 
 ###Optional settings
 
